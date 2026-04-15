@@ -29,7 +29,7 @@
 ```powershell
 # کوڈ کلون کریں
 git clone https://github.com/Hafiz380/enhanced-strix.git
-cd enhanced-strix/strix
+cd enhanced-strix
 
 # ورچوئل انوائرمنٹ بنائیں
 python -m venv venv
@@ -47,30 +47,51 @@ $env:LLM_API_KEY="your-api-key"
 
 # اسکین شروع کریں
 strix --target https://example.com
+
+# اگر 'strix' کمانڈ نہ چلے تو یہ استعمال کریں:
+python -m strix.interface.main --target https://example.com
 ```
 
 ---
 
-## **3. لینکس اور اوبنٹو (Linux / Ubuntu) پر انسٹالیشن**
+## **3. لینکس اور کالی لینکس (Linux / Kali) پر انسٹالیشن**
+
+کالی لینکس (Kali Linux) پر پائتھن پیکیجز کو براہ راست انسٹال کرنا منع ہے (**externally-managed-environment**)، اس لیے ورچوئل انوائرمنٹ (venv) لازمی ہے۔
 
 ### **مرحلہ 1: ضروری ٹولز انسٹال کریں**
 ```bash
 sudo apt update
 sudo apt install python3-venv python3-pip docker.io git -y
 
-# ڈوکر کو بغیر sudo کے چلانے کے لیے (اختیاری لیکن تجویز کردہ)
+# ڈوکر کو بغیر sudo کے چلانے کے لیے
 sudo usermod -aG docker $USER
 # اس کے بعد لاگ آؤٹ کر کے دوبارہ لاگ ان کریں
 ```
 
-### **مرحلہ 2: انسٹالیشن**
+### **مرحلہ 2: انسٹالیشن (کالی لینکس کے لیے مخصوص طریقہ)**
 ```bash
 git clone https://github.com/Hafiz380/enhanced-strix.git
-cd enhanced-strix/strix
+cd enhanced-strix
 
+# ورچوئل انوائرمنٹ بنانا اور ایکٹیویٹ کرنا
 python3 -m venv venv
 source venv/bin/activate
+
+# اب ڈیپینڈنسیز انسٹال کریں
 pip install -e .
+```
+
+### **مرحلہ 3: ٹول چلانا**
+```bash
+# API Keys سیٹ کریں
+export STRIX_LLM="openai/gpt-4o"
+export LLM_API_KEY="your-api-key"
+
+# اسکین شروع کریں
+strix --target https://example.com
+
+# اگر 'strix' کمانڈ نہ ملے تو یہ استعمال کریں (Trae Terminal طریقہ):
+python3 -m strix.interface.main --target https://example.com
 ```
 
 ---
@@ -83,7 +104,7 @@ pip install -e .
 # ونڈوز کے لیے
 $env:STRIX_LLM="openai/your-model-name"
 $env:LLM_API_KEY="your-key"
-$env:LLM_API_BASE="http://localhost:20128/v1" # اپنا پراکسی URL دیں
+$env:LLM_API_BASE="http://localhost:20128/v1"
 
 # لینکس کے لیے
 export STRIX_LLM="openai/your-model-name"
@@ -93,7 +114,7 @@ export LLM_API_BASE="http://localhost:20128/v1"
 
 ---
 
-## **5. وریفیکیشن (کیسے پتہ چلے کہ سب ٹھیک ہے؟)**
+## **5. وریفیکیشن (Verification)**
 
 انسٹالیشن کے بعد یہ چیکس کریں:
 1. **Version Check**: `strix --version` چلائیں، یہ ورژن دکھائے گا۔
@@ -106,10 +127,10 @@ export LLM_API_BASE="http://localhost:20128/v1"
 
 | مسئلہ | وجہ | حل |
 | :--- | :--- | :--- |
-| **DOCKER NOT INSTALLED** | ڈوکر نہیں چل رہا یا انسٹال نہیں ہے | ڈوکر ڈیسک ٹاپ چلائیں یا `sudo systemctl start docker` کریں۔ |
-| **ModuleNotFoundError** | لائبریریز انسٹال نہیں ہوئیں | دوبارہ `pip install -e .` چلائیں۔ |
-| **Invalid API Key** | غلط Key یا پراکسی مسئلہ | اپنا API Key اور Base URL دوبارہ چیک کریں۔ |
-| **Permission Denied** | sudo کی ضرورت ہے | کمانڈ کے شروع میں `sudo` لگائیں یا یوزر پرمیشنز درست کریں۔ |
+| **externally-managed-environment** | کالی لینکس پر براہ راست انسٹالیشن | ہمیشہ `venv` ایکٹیویٹ کر کے `pip` استعمال کریں۔ |
+| **neither 'setup.py' nor 'pyproject.toml' found** | غلط فولڈر میں ہونا | یقینی بنائیں کہ آپ `enhanced-strix` فولڈر کے اندر ہیں (جہاں `pyproject.toml` ہے)۔ |
+| **DOCKER NOT INSTALLED** | ڈوکر نہیں چل رہا | ڈوکر ڈیسک ٹاپ چلائیں یا `sudo systemctl start docker` کریں۔ |
+| **ModuleNotFoundError** | لائبریریز انسٹال نہیں ہوئیں | دوبارہ `pip install -e .` چلائیں (venv کے اندر)۔ |
 
 ---
 

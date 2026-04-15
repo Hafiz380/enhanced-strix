@@ -87,7 +87,7 @@ Strix are autonomous AI agents that act just like real hackers - they run your c
 ```bash
 # Clone the repository
 git clone https://github.com/Hafiz380/enhanced-strix.git
-cd enhanced-strix/strix
+cd enhanced-strix
 
 # Set up environment
 python -m venv venv
@@ -107,6 +107,9 @@ export LLM_API_KEY="your-api-key"
 
 # Run the security assessment
 strix --target https://example.com
+
+# If 'strix' command is not found, use:
+python -m strix.interface.main --target https://example.com
 ```
 
 > [!NOTE]
