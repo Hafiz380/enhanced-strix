@@ -16,285 +16,141 @@
 <a href="https://strix.ai"><img src="https://img.shields.io/badge/Website-strix.ai-f0f0f0?style=for-the-badge&logoColor=000000" alt="Website"></a>
 [![](https://dcbadge.limes.pink/api/server/strix-ai)](https://discord.gg/strix-ai)
 
-<a href="https://deepwiki.com/usestrix/strix"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-<a href="https://github.com/usestrix/strix"><img src="https://img.shields.io/github/stars/usestrix/strix?style=flat-square" alt="GitHub Stars"></a>
+<a href="https://github.com/Hafiz380/enhanced-strix"><img src="https://img.shields.io/github/stars/Hafiz380/enhanced-strix?style=flat-square" alt="GitHub Stars"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-3b82f6?style=flat-square" alt="License"></a>
-<a href="https://pypi.org/project/strix-agent/"><img src="https://img.shields.io/pypi/v/strix-agent?style=flat-square" alt="PyPI Version"></a>
-
-
-<a href="https://discord.gg/strix-ai"><img src="https://github.com/usestrix/.github/raw/main/imgs/Discord.png" height="40" alt="Join Discord"></a>
-<a href="https://x.com/strix_ai"><img src="https://github.com/usestrix/.github/raw/main/imgs/X.png" height="40" alt="Follow on X"></a>
-
-
-<a href="https://trendshift.io/repositories/15362" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15362" alt="usestrix/strix | Trendshift" width="250" height="55"/></a>
 
 </div>
 
+---
 
-> [!TIP]
-> **New!** Strix integrates seamlessly with GitHub Actions and CI/CD pipelines. Automatically scan for vulnerabilities on every pull request and block insecure code before it reaches production - [Get started with no setup required](https://app.strix.ai).
+## 🌟 Enhanced Features (ECC Integration)
 
-## Enhanced Features (Strix + ECC)
+**Enhanced Strix** is a specialized version that merges the core power of Strix with the advanced performance optimization of **Everything-Claude-Code (ECC)**.
 
-**Enhanced Strix** combines the powerful vulnerability scanning of Strix with the specialized intelligence, memory management, and extensive skill set of **Everything-Claude-Code (ECC)**.
+- **🚀 150+ Specialized Skills**: Deep research, language-specific patterns (Go, Rust, Java), and advanced security scanning.
+- **🎭 48 AI Personas**: Switch roles between `security-reviewer`, `code-architect`, `bug-hunter`, and more.
+- **🧠 Memory Persistence**: Advanced context compression using ECC "Strategic Compact" logic to save tokens.
+- **🛡️ Better Verification**: Multi-step validation loops to eliminate false positives.
 
-- **150+ New Skills**: Includes skills for deep research, specialized coding patterns (Django, Rust, Go, etc.), and advanced security scanning.
-- **48 Agent Personas**: Switch between specialized personas like `code-reviewer`, `security-reviewer`, `architect`, and `planner`.
-- **Memory Optimization**: Integrated "Strategic Compact" logic from ECC for efficient token usage and long-session context management.
-- **Improved Reasoning**: ECC performance rules integrated into the agent's core system prompt.
+---
 
-## Strix Overview
+## 💻 Windows Installation Guide (Beginner Friendly)
 
-Strix are autonomous AI agents that act just like real hackers - they run your code dynamically, find vulnerabilities, and validate them through actual proof-of-concepts. Built for developers and security teams who need fast, accurate security testing without the overhead of manual pentesting or the false positives of static analysis tools.
+Follow these steps to set up Enhanced Strix on your Windows machine from scratch.
 
-**Key Capabilities:**
+### 1. Minimum System Requirements
+- **OS**: Windows 10 or 11 (64-bit)
+- **RAM**: 8GB Minimum (16GB Recommended)
+- **Disk Space**: 10GB (for Docker images and project files)
+- **Internet**: Stable connection for LLM API and Docker pulls.
 
-- **Full hacker toolkit** out of the box
-- **Teams of agents** that collaborate and scale
-- **Real validation** with PoCs, not false positives
-- **Developer‑first** CLI with actionable reports
-- **Auto‑fix & reporting** to accelerate remediation
+### 2. Prerequisite Software
+Ensure you have these installed. Click the links for official installers:
+1. **Python 3.12+**: [Download here](https://www.python.org/downloads/). *Check "Add Python to PATH" during installation.*
+2. **Git**: [Download here](https://git-scm.com/download/win).
+3. **Docker Desktop**: [Download here](https://www.docker.com/products/docker-desktop/). *Required for the security sandbox.*
 
+### 3. Step-by-Step Setup (PowerShell)
+Open **PowerShell** as Administrator and run these commands one by one:
 
-<br>
-
-
-<div align="center">
-  <a href="https://strix.ai">
-    <img src=".github/screenshot.png" alt="Strix Demo" width="1000" style="border-radius: 16px;">
-  </a>
-</div>
-
-
-## Use Cases
-
-- **Application Security Testing** - Detect and validate critical vulnerabilities in your applications
-- **Rapid Penetration Testing** - Get penetration tests done in hours, not weeks, with compliance reports
-- **Bug Bounty Automation** - Automate bug bounty research and generate PoCs for faster reporting
-- **CI/CD Integration** - Run tests in CI/CD to block vulnerabilities before reaching production
-
-## 🚀 Quick Start
-
-**Detailed Guide**: See the [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for full instructions on Windows, Linux, and Ubuntu.
-
-### Prerequisites:
-- Docker (running)
-- Python 3.12+
-- LLM API Key (OpenAI, Anthropic, or local proxy)
-
-### Installation
-
-```bash
-# Clone the repository
+**Step A: Clone the Project**
+```powershell
 git clone https://github.com/Hafiz380/enhanced-strix.git
 cd enhanced-strix
+```
 
-# Set up environment
+**Step B: Create Virtual Environment**
+```powershell
 python -m venv venv
-# Windows: .\venv\Scripts\activate
-# Linux: source venv/bin/activate
+.\venv\Scripts\activate
+```
 
-# Install dependencies
+**Step C: Install Dependencies**
+```powershell
 pip install -e .
 ```
 
-### Run a Scan
+### 4. Configuration (Environment Variables)
+You must set your AI API key. Replace `your-api-key` with your actual key.
 
-```bash
-# Configure LLM
-export STRIX_LLM="openai/gpt-4o"
-export LLM_API_KEY="your-api-key"
+```powershell
+# Set the model (e.g., GPT-4o)
+$env:STRIX_LLM="openai/gpt-4o"
 
-# Run the security assessment
-strix --target https://example.com
+# Set your API Key
+$env:LLM_API_KEY="sk-xxxx-your-key-here"
 
-# If 'strix' command is not found, use:
-python -m strix.interface.main --target https://example.com
+# Optional: If using a local proxy (like iflow.cn or Ollama)
+$env:LLM_API_BASE="http://localhost:20128/v1"
 ```
 
-> [!NOTE]
-> First run automatically pulls the sandbox Docker image. Results are saved to `strix_runs/<run-name>`
+### 5. Verification Test
+To confirm everything is working, run:
+```powershell
+strix --version
+```
+If it shows the version number, your installation is successful!
+
+---
+
+## 🐧 Linux / Kali Linux Installation
+
+Linux users (especially Kali) should use a virtual environment to avoid `externally-managed-environment` errors.
+
+```bash
+# Update and Install Essentials
+sudo apt update && sudo apt install -y python3-venv python3-pip docker.io git
+
+# Clone and Setup
+git clone https://github.com/Hafiz380/enhanced-strix.git
+cd enhanced-strix
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
+
+# Run Verification
+python3 -m strix.interface.main --version
+```
+
+---
+
+## 🚀 Usage & Low-Resource Mode
+
+To run a scan with **minimum resources** (saves RAM and Tokens), use the following command:
+
+```powershell
+# Low Resource Command
+strix -t https://your-target.com -m quick -n
+```
+
+### Flag Explanation:
+- `-t / --target`: The website you want to test.
+- `-m quick`: Uses the **Quick Scan** mode. It performs fewer, more targeted tests to save time and processing power.
+- `-n / --non-interactive`: Runs in **Headless Mode**. This disables the heavy terminal UI, reducing CPU usage significantly.
+
+**Pro Tip**: To save even more resources, set the reasoning effort to medium:
+`$env:STRIX_REASONING_EFFORT="medium"`
+
+---
+
+## 🛠️ Common Errors & Solutions
+
+| Error Message | Solution |
+| :--- | :--- |
+| **DOCKER NOT INSTALLED** | Ensure Docker Desktop is running and shows a green "Running" status. |
+| **Invalid API Key** | Double check your `LLM_API_KEY`. If using a proxy, ensure `LLM_API_BASE` is correct. |
+| **externally-managed-environment** | (Linux only) Always activate the `venv` before running `pip`. |
+| **ModuleNotFoundError** | Run `pip install -e .` again inside your activated virtual environment. |
 
 ---
 
 ## ☁️ Strix Platform
+Try the full-stack platform at **[app.strix.ai](https://app.strix.ai)** for one-click pentests and auto-remediation.
 
-Try the Strix full-stack security platform at **[app.strix.ai](https://app.strix.ai)** — sign up for free, connect your repos and domains, and launch a pentest in minutes.
-
-- **Validated findings with PoCs** and reproduction steps
-- **One-click autofix** as ready-to-merge pull requests
-- **Continuous monitoring** across code, cloud, and infrastructure
-- **Integrations** with GitHub, Slack, Jira, Linear, and CI/CD pipelines
-- **Continuous learning** that builds on past findings and remediations
-
-[**Start your first pentest →**](https://app.strix.ai)
+## 📄 License
+Licensed under [Apache-2.0](LICENSE).
 
 ---
-
-## ✨ Features
-
-### Agentic Security Tools
-
-Strix agents come equipped with a comprehensive security testing toolkit:
-
-- **Full HTTP Proxy** - Full request/response manipulation and analysis
-- **Browser Automation** - Multi-tab browser for testing of XSS, CSRF, auth flows
-- **Terminal Environments** - Interactive shells for command execution and testing
-- **Python Runtime** - Custom exploit development and validation
-- **Reconnaissance** - Automated OSINT and attack surface mapping
-- **Code Analysis** - Static and dynamic analysis capabilities
-- **Knowledge Management** - Structured findings and attack documentation
-
-### Comprehensive Vulnerability Detection
-
-Strix can identify and validate a wide range of security vulnerabilities:
-
-- **Access Control** - IDOR, privilege escalation, auth bypass
-- **Injection Attacks** - SQL, NoSQL, command injection
-- **Server-Side** - SSRF, XXE, deserialization flaws
-- **Client-Side** - XSS, prototype pollution, DOM vulnerabilities
-- **Business Logic** - Race conditions, workflow manipulation
-- **Authentication** - JWT vulnerabilities, session management
-- **Infrastructure** - Misconfigurations, exposed services
-
-### Graph of Agents
-
-Advanced multi-agent orchestration for comprehensive security testing:
-
-- **Distributed Workflows** - Specialized agents for different attacks and assets
-- **Scalable Testing** - Parallel execution for fast comprehensive coverage
-- **Dynamic Coordination** - Agents collaborate and share discoveries
-
----
-
-## Usage Examples
-
-### Basic Usage
-
-```bash
-# Scan a local codebase
-strix --target ./app-directory
-
-# Security review of a GitHub repository
-strix --target https://github.com/org/repo
-
-# Black-box web application assessment
-strix --target https://your-app.com
-```
-
-### Advanced Testing Scenarios
-
-```bash
-# Grey-box authenticated testing
-strix --target https://your-app.com --instruction "Perform authenticated testing using credentials: user:pass"
-
-# Multi-target testing (source code + deployed app)
-strix -t https://github.com/org/app -t https://your-app.com
-
-# White-box source-aware scan (local repository)
-strix --target ./app-directory --scan-mode standard
-
-# Focused testing with custom instructions
-strix --target api.your-app.com --instruction "Focus on business logic flaws and IDOR vulnerabilities"
-
-# Provide detailed instructions through file (e.g., rules of engagement, scope, exclusions)
-strix --target api.your-app.com --instruction-file ./instruction.md
-
-# Force PR diff-scope against a specific base branch
-strix -n --target ./ --scan-mode quick --scope-mode diff --diff-base origin/main
-```
-
-### Headless Mode
-
-Run Strix programmatically without interactive UI using the `-n/--non-interactive` flag—perfect for servers and automated jobs. The CLI prints real-time vulnerability findings, and the final report before exiting. Exits with non-zero code when vulnerabilities are found.
-
-```bash
-strix -n --target https://your-app.com
-```
-
-### CI/CD (GitHub Actions)
-
-Strix can be added to your pipeline to run a security test on pull requests with a lightweight GitHub Actions workflow:
-
-```yaml
-name: strix-penetration-test
-
-on:
-  pull_request:
-
-jobs:
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Install Strix
-        run: curl -sSL https://strix.ai/install | bash
-
-      - name: Run Strix
-        env:
-          STRIX_LLM: ${{ secrets.STRIX_LLM }}
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-
-        run: strix -n -t ./ --scan-mode quick
-```
-
-> [!TIP]
-> In CI pull request runs, Strix automatically scopes quick reviews to changed files.
-> If diff-scope cannot resolve, ensure checkout uses full history (`fetch-depth: 0`) or pass
-> `--diff-base` explicitly.
-
-### Configuration
-
-```bash
-export STRIX_LLM="openai/gpt-5.4"
-export LLM_API_KEY="your-api-key"
-
-# Optional
-export LLM_API_BASE="your-api-base-url"  # if using a local model, e.g. Ollama, LMStudio
-export PERPLEXITY_API_KEY="your-api-key"  # for search capabilities
-export STRIX_REASONING_EFFORT="high"  # control thinking effort (default: high, quick scan: medium)
-```
-
-> [!NOTE]
-> Strix automatically saves your configuration to `~/.strix/cli-config.json`, so you don't have to re-enter it on every run.
-
-**Recommended models for best results:**
-
-- [OpenAI GPT-5.4](https://openai.com/api/) — `openai/gpt-5.4`
-- [Anthropic Claude Sonnet 4.6](https://claude.com/platform/api) — `anthropic/claude-sonnet-4-6`
-- [Google Gemini 3 Pro Preview](https://cloud.google.com/vertex-ai) — `vertex_ai/gemini-3-pro-preview`
-
-See the [LLM Providers documentation](https://docs.strix.ai/llm-providers/overview) for all supported providers including Vertex AI, Bedrock, Azure, and local models.
-
-## Enterprise
-
-Get the same Strix experience with [enterprise-grade](https://strix.ai/demo) controls: SSO (SAML/OIDC), custom compliance reports, dedicated support & SLA, custom deployment options (VPC/self-hosted), BYOK model support, and tailored agents optimized for your environment. [Learn more](https://strix.ai/demo).
-
-## Documentation
-
-Full documentation is available at **[docs.strix.ai](https://docs.strix.ai)** — including detailed guides for usage, CI/CD integrations, skills, and advanced configuration.
-
-## Contributing
-
-We welcome contributions of code, docs, and new skills - check out our [Contributing Guide](https://docs.strix.ai/contributing) to get started or open a [pull request](https://github.com/usestrix/strix/pulls)/[issue](https://github.com/usestrix/strix/issues).
-
-## Join Our Community
-
-Have questions? Found a bug? Want to contribute? **[Join our Discord!](https://discord.gg/strix-ai)**
-
-## Support the Project
-
-**Love Strix?** Give us a ⭐ on GitHub!
-
-## Acknowledgements
-
-Strix builds on the incredible work of open-source projects like [LiteLLM](https://github.com/BerriAI/litellm), [Caido](https://github.com/caido/caido), [Nuclei](https://github.com/projectdiscovery/nuclei), [Playwright](https://github.com/microsoft/playwright), and [Textual](https://github.com/Textualize/textual). Huge thanks to their maintainers!
-
-
-> [!WARNING]
-> Only test apps you own or have permission to test. You are responsible for using Strix ethically and legally.
-
+<div align="center">
+  Built with ❤️ by the community. Join our <b><a href="https://discord.gg/strix-ai">Discord</a></b> for support!
 </div>
