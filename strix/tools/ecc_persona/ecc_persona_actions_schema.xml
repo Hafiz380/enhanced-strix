@@ -1,0 +1,20 @@
+<tool_schema>
+  <tool_name>load_ecc_persona</tool_name>
+  <description>
+    Switch the current agent's persona to an ECC (Everything Claude Code) specialized persona.
+    ECC personas provide specialized behavioral instincts and knowledge for tasks like
+    code review, security analysis, architectural planning, and performance optimization.
+    Switching a persona updates the agent's internal identity and behavior guidelines.
+  </description>
+  <parameters>
+    <parameter>
+      <name>persona_name</name>
+      <type>string</type>
+      <description>
+        The name of the ECC persona to load.
+        Example: 'code-reviewer', 'security-reviewer', 'architect', 'planner', 'tdd-guide'.
+      </description>
+      <required>true</required>
+    </parameter>
+  </parameters>
+</tool_schema>
