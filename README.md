@@ -6,14 +6,13 @@
 
 <div align="center">
 
-# Strix
+# Enhanced Strix (Strix + Everything-Claude-Code)
 
-### Open-source AI hackers to find and fix your app’s vulnerabilities.
+### Open-source AI hackers with ECC-powered intelligence, skills, and memory optimization.
 
 <br/>
 
-
-<a href="https://docs.strix.ai"><img src="https://img.shields.io/badge/Docs-docs.strix.ai-2b9246?style=for-the-badge&logo=gitbook&logoColor=white" alt="Docs"></a>
+<a href="INSTALLATION_GUIDE.md"><img src="https://img.shields.io/badge/Guide-Installation-blue?style=for-the-badge&logo=markdown&logoColor=white" alt="Installation Guide"></a>
 <a href="https://strix.ai"><img src="https://img.shields.io/badge/Website-strix.ai-f0f0f0?style=for-the-badge&logoColor=000000" alt="Website"></a>
 [![](https://dcbadge.limes.pink/api/server/strix-ai)](https://discord.gg/strix-ai)
 
@@ -35,8 +34,14 @@
 > [!TIP]
 > **New!** Strix integrates seamlessly with GitHub Actions and CI/CD pipelines. Automatically scan for vulnerabilities on every pull request and block insecure code before it reaches production - [Get started with no setup required](https://app.strix.ai).
 
----
+## Enhanced Features (Strix + ECC)
 
+**Enhanced Strix** combines the powerful vulnerability scanning of Strix with the specialized intelligence, memory management, and extensive skill set of **Everything-Claude-Code (ECC)**.
+
+- **150+ New Skills**: Includes skills for deep research, specialized coding patterns (Django, Rust, Go, etc.), and advanced security scanning.
+- **48 Agent Personas**: Switch between specialized personas like `code-reviewer`, `security-reviewer`, `architect`, and `planner`.
+- **Memory Optimization**: Integrated "Strategic Compact" logic from ECC for efficient token usage and long-session context management.
+- **Improved Reasoning**: ECC performance rules integrated into the agent's core system prompt.
 
 ## Strix Overview
 
@@ -70,22 +75,38 @@ Strix are autonomous AI agents that act just like real hackers - they run your c
 
 ## 🚀 Quick Start
 
-**Prerequisites:**
-- Docker (running)
-- An LLM API key from any [supported provider](https://docs.strix.ai/llm-providers/overview) (OpenAI, Anthropic, Google, etc.)
+**Detailed Guide**: See the [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for full instructions on Windows, Linux, and Ubuntu.
 
-### Installation & First Scan
+### Prerequisites:
+- Docker (running)
+- Python 3.12+
+- LLM API Key (OpenAI, Anthropic, or local proxy)
+
+### Installation
 
 ```bash
-# Install Strix
-curl -sSL https://strix.ai/install | bash
+# Clone the repository
+git clone https://github.com/Hafiz380/enhanced-strix.git
+cd enhanced-strix/strix
 
-# Configure your AI provider
-export STRIX_LLM="openai/gpt-5.4"
+# Set up environment
+python -m venv venv
+# Windows: .\venv\Scripts\activate
+# Linux: source venv/bin/activate
+
+# Install dependencies
+pip install -e .
+```
+
+### Run a Scan
+
+```bash
+# Configure LLM
+export STRIX_LLM="openai/gpt-4o"
 export LLM_API_KEY="your-api-key"
 
-# Run your first security assessment
-strix --target ./app-directory
+# Run the security assessment
+strix --target https://example.com
 ```
 
 > [!NOTE]
