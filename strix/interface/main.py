@@ -263,164 +263,80 @@ def get_version() -> str:
         return "unknown"
 
 
+from strix.config.settings_manager import SettingsManager
+from strix.telemetry.token_report import TokenReporter
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Strix Multi-Agent Cybersecurity Penetration Testing Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Web application penetration test
-  strix --target https://example.com
-
-  # GitHub repository analysis
-  strix --target https://github.com/user/repo
-  strix --target git@github.com:user/repo.git
-
-  # Local code analysis
-  strix --target ./my-project
-
-  # Domain penetration test
-  strix --target example.com
-
-  # IP address penetration test
-  strix --target 192.168.1.42
-
-  # Multiple targets (e.g., white-box testing with source and deployed app)
-  strix --target https://github.com/user/repo --target https://example.com
-  strix --target ./my-project --target https://staging.example.com --target https://prod.example.com
-
-  # Custom instructions (inline)
-  strix --target example.com --instruction "Focus on authentication vulnerabilities"
-
-  # Custom instructions (from file)
-  strix --target example.com --instruction-file ./instructions.txt
-  strix --target https://app.com --instruction-file /path/to/detailed_instructions.md
-        """,
     )
 
-    parser.add_argument(
-        "-v",
-        "--version",
-        action="version",
-        version=f"strix {get_version()}",
-    )
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
-    parser.add_argument(
-        "-t",
-        "--target",
-        type=str,
-        required=True,
-        action="append",
-        help="Target to test (URL, repository, local directory path, domain name, or IP address). "
-        "Can be specified multiple times for multi-target scans.",
+    # Scan command (default)
+    scan_parser = subparsers.add_parser("scan", help="Run a security scan")
+    scan_parser.add_argument(
+        "-t", "--target", type=str, required=True, action="append",
+        help="Target to test (URL, repo, dir, domain, IP)"
     )
-    parser.add_argument(
-        "--instruction",
-        type=str,
-        help="Custom instructions for the penetration test. This can be "
-        "specific vulnerability types to focus on (e.g., 'Focus on IDOR and XSS'), "
-        "testing approaches (e.g., 'Perform thorough authentication testing'), "
-        "test credentials (e.g., 'Use the following credentials to access the app: "
-        "admin:password123'), "
-        "or areas of interest (e.g., 'Check login API endpoint for security issues').",
-    )
+    scan_parser.add_argument("--instruction", type=str)
+    scan_parser.add_argument("--instruction-file", type=str)
+    scan_parser.add_argument("-n", "--non-interactive", action="store_true")
+    scan_parser.add_argument("-m", "--scan-mode", choices=["quick", "standard", "deep"], default="deep")
+    scan_parser.add_argument("--scope-mode", choices=["auto", "diff", "full"], default="auto")
+    scan_parser.add_argument("--diff-base", type=str)
+    scan_parser.add_argument("--config", type=str)
 
-    parser.add_argument(
-        "--instruction-file",
-        type=str,
-        help="Path to a file containing detailed custom instructions for the penetration test. "
-        "Use this option when you have lengthy or complex instructions saved in a file "
-        "(e.g., '--instruction-file ./detailed_instructions.txt').",
-    )
+    # Config command
+    config_parser = subparsers.add_parser("config", help="Manage API configurations")
+    config_subparsers = config_parser.add_subparsers(dest="config_command")
+    
+    add_parser = config_subparsers.add_parser("add", help="Add a new API configuration")
+    add_parser.add_argument("--name", required=True)
+    add_parser.add_argument("--model", required=True)
+    add_parser.add_argument("--key", required=True)
+    add_parser.add_argument("--base", help="API base URL")
+    add_parser.add_argument("--priority", type=int, default=100)
 
-    parser.add_argument(
-        "-n",
-        "--non-interactive",
-        action="store_true",
-        help=(
-            "Run in non-interactive mode (no TUI, exits on completion). "
-            "Default is interactive mode with TUI."
-        ),
-    )
+    # Stats command
+    subparsers.add_parser("stats", help="Show token usage statistics")
 
-    parser.add_argument(
-        "-m",
-        "--scan-mode",
-        type=str,
-        choices=["quick", "standard", "deep"],
-        default="deep",
-        help=(
-            "Scan mode: "
-            "'quick' for fast CI/CD checks, "
-            "'standard' for routine testing, "
-            "'deep' for thorough security reviews (default). "
-            "Default: deep."
-        ),
-    )
+    # Version
+    parser.add_argument("-v", "--version", action="version", version=f"strix {get_version()}")
 
-    parser.add_argument(
-        "--scope-mode",
-        type=str,
-        choices=["auto", "diff", "full"],
-        default="auto",
-        help=(
-            "Scope mode for code targets: "
-            "'auto' enables PR diff-scope in CI/headless runs, "
-            "'diff' forces changed-files scope, "
-            "'full' disables diff-scope."
-        ),
-    )
-
-    parser.add_argument(
-        "--diff-base",
-        type=str,
-        help=(
-            "Target branch or commit to compare against (e.g., origin/main). "
-            "Defaults to the repository's default branch."
-        ),
-    )
-
-    parser.add_argument(
-        "--config",
-        type=str,
-        help="Path to a custom config file (JSON) to use instead of ~/.strix/cli-config.json",
-    )
+    # Handle legacy mode (no subcommand)
+    if len(sys.argv) > 1 and sys.argv[1] not in ["scan", "config", "stats", "-v", "--version", "-h", "--help"]:
+        sys.argv.insert(1, "scan")
 
     args = parser.parse_args()
 
-    if args.instruction and args.instruction_file:
-        parser.error(
-            "Cannot specify both --instruction and --instruction-file. Use one or the other."
-        )
+    if args.command == "scan":
+        if args.instruction and args.instruction_file:
+            parser.error("Cannot specify both --instruction and --instruction-file.")
 
-    if args.instruction_file:
-        instruction_path = Path(args.instruction_file)
-        try:
-            with instruction_path.open(encoding="utf-8") as f:
-                args.instruction = f.read().strip()
-                if not args.instruction:
-                    parser.error(f"Instruction file '{instruction_path}' is empty")
-        except Exception as e:  # noqa: BLE001
-            parser.error(f"Failed to read instruction file '{instruction_path}': {e}")
+        if args.instruction_file:
+            instruction_path = Path(args.instruction_file)
+            try:
+                with instruction_path.open(encoding="utf-8") as f:
+                    args.instruction = f.read().strip()
+            except Exception as e:
+                parser.error(f"Failed to read instruction file: {e}")
 
-    args.targets_info = []
-    for target in args.target:
-        try:
-            target_type, target_dict = infer_target_type(target)
+        args.targets_info = []
+        for target in args.target:
+            try:
+                target_type, target_dict = infer_target_type(target)
+                args.targets_info.append({
+                    "type": target_type, 
+                    "details": target_dict, 
+                    "original": target
+                })
+            except ValueError:
+                parser.error(f"Invalid target '{target}'")
 
-            if target_type == "local_code":
-                display_target = target_dict.get("target_path", target)
-            else:
-                display_target = target
-
-            args.targets_info.append(
-                {"type": target_type, "details": target_dict, "original": display_target}
-            )
-        except ValueError:
-            parser.error(f"Invalid target '{target}'")
-
-    assign_workspace_subdirs(args.targets_info)
-    rewrite_localhost_targets(args.targets_info, HOST_GATEWAY_HOSTNAME)
+        assign_workspace_subdirs(args.targets_info)
+        rewrite_localhost_targets(args.targets_info, HOST_GATEWAY_HOSTNAME)
 
     return args
 
@@ -543,7 +459,27 @@ def main() -> None:  # noqa: PLR0912, PLR0915
 
     args = parse_arguments()
 
-    if args.config:
+    if args.command == "config":
+        mgr = SettingsManager()
+        if args.config_command == "add":
+            if mgr.add_config(args.name, args.model, args.key, args.base, args.priority):
+                print(f"Successfully added configuration: {args.name}")
+            else:
+                print("Failed to save configuration")
+        return
+
+    if args.command == "stats":
+        reporter = TokenReporter()
+        print(reporter.generate_report())
+        return
+
+    # Scan command (or default)
+    if args.command == "scan":
+        # Handle legacy or explicit scan command
+        pass
+    
+    # Rest of original main logic...
+    if hasattr(args, 'config') and args.config:
         apply_config_override(args.config)
 
     check_docker_installed()

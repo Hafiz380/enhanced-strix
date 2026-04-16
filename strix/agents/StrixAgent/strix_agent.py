@@ -148,4 +148,14 @@ class StrixAgent(BaseAgent):
         if user_instructions:
             task_description += f"\n\nSpecial instructions: {user_instructions}"
 
-        return await self.agent_loop(task=task_description)
+        result = await self.agent_loop(task=task_description)
+        
+        # Report token usage stats
+        from strix.telemetry.token_report import TokenReporter
+        reporter = TokenReporter()
+        reporter.save_session_stats(
+            session_id=scan_config.get("scan_id", "unknown"),
+            stats=self.llm._total_stats.to_dict()
+        )
+        
+        return result

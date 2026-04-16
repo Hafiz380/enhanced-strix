@@ -1,112 +1,112 @@
-# Enhanced Strix: مکمل انسٹالیشن اور سیٹ اپ گائیڈ
+# Enhanced Strix: Complete Installation & Setup Guide
 
-اس گائیڈ میں **Enhanced Strix** (جس میں Everything-Claude-Code انٹیگریٹڈ ہے) کو ونڈوز، لینکس، اور اوبنٹو پر انسٹال کرنے کا مکمل طریقہ کار بیان کیا گیا ہے۔
-
----
-
-## **1. بنیادی ضروریات (Prerequisites)**
-
-انسٹالیشن شروع کرنے سے پہلے یقینی بنائیں کہ آپ کے سسٹم میں درج ذیل چیزیں موجود ہیں:
-
-- **Python 3.12 یا اس سے جدید**: [python.org](https://www.python.org/) سے ڈاؤن لوڈ کریں۔
-- **Docker**: سیکیورٹی سینڈ باکس چلانے کے لیے لازمی ہے۔
-- **Git**: کوڈ ڈاؤن لوڈ کرنے کے لیے۔
-- **LLM API Key**: (OpenAI, Anthropic, یا کوئی لوکل پراکسی)۔
+This guide provides a step-by-step procedure to install **Enhanced Strix** (integrated with Everything-Claude-Code) on Windows, Linux, and Ubuntu.
 
 ---
 
-## **2. ونڈوز (Windows) پر انسٹالیشن**
+## **1. Prerequisites**
 
-ونڈوز پر ہم **PowerShell** استعمال کریں گے۔
+Before starting the installation, ensure you have the following on your system:
 
-### **مرحلہ 1: ڈوکر (Docker) کا سیٹ اپ**
-1. [Docker Desktop](https://www.docker.com/products/docker-desktop/) ڈاؤن لوڈ اور انسٹال کریں۔
-2. انسٹالیشن کے بعد کمپیوٹر ری اسٹارٹ کریں۔
-3. ڈوکر ڈیسک ٹاپ چلائیں اور یقینی بنائیں کہ نیچے بائیں کونے میں سبز رنگ کا آئیکون "Running" دکھا رہا ہے۔
+- **Python 3.12 or newer**: Download from [python.org](https://www.python.org/).
+- **Docker**: Required for running the security sandbox.
+- **Git**: For downloading the code.
+- **LLM API Key**: (OpenAI, Anthropic, or a local proxy).
 
-### **مرحلہ 2: کوڈ ڈاؤن لوڈ اور انوائرمنٹ بنانا**
-ٹرمینل (PowerShell) کھولیں اور یہ کمانڈز چلائیں:
+---
+
+## **2. Installation on Windows**
+
+We will use **PowerShell** on Windows.
+
+### **Step 1: Docker Setup**
+1. Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+2. Restart your computer after installation.
+3. Run Docker Desktop and ensure the green icon in the bottom-left corner says "Running".
+
+### **Step 2: Download Code & Create Environment**
+Open **PowerShell** and run these commands:
 ```powershell
-# کوڈ کلون کریں
+# Clone the repository
 git clone https://github.com/Hafiz380/enhanced-strix.git
 cd enhanced-strix
 
-# ورچوئل انوائرمنٹ بنائیں
+# Create virtual environment
 python -m venv venv
 .\venv\Scripts\activate
 
-# لائبریریز انسٹال کریں
+# Install libraries
 pip install -e .
 ```
 
-### **مرحلہ 3: ٹول چلانا**
+### **Step 3: Run the Tool**
 ```powershell
-# API Keys سیٹ کریں
-$env:STRIX_LLM="openai/gpt-4o"  # یا اپنا ماڈل
+# Set API Keys
+$env:STRIX_LLM="openai/gpt-4o"  # Or your preferred model
 $env:LLM_API_KEY="your-api-key"
 
-# اسکین شروع کریں
+# Start the scan
 strix --target https://example.com
 
-# اگر 'strix' کمانڈ نہ چلے تو یہ استعمال کریں:
+# If 'strix' command doesn't work directly, use:
 python -m strix.interface.main --target https://example.com
 ```
 
 ---
 
-## **3. لینکس اور کالی لینکس (Linux / Kali) پر انسٹالیشن**
+## **3. Installation on Linux and Kali Linux**
 
-کالی لینکس (Kali Linux) پر پائتھن پیکیجز کو براہ راست انسٹال کرنا منع ہے (**externally-managed-environment**)، اس لیے ورچوئل انوائرمنٹ (venv) لازمی ہے۔
+On Kali Linux, installing Python packages directly is restricted (**externally-managed-environment**), so a virtual environment (venv) is mandatory.
 
-### **مرحلہ 1: ضروری ٹولز انسٹال کریں**
+### **Step 1: Install Required Tools**
 ```bash
 sudo apt update
 sudo apt install python3-venv python3-pip docker.io git -y
 
-# ڈوکر کو بغیر sudo کے چلانے کے لیے
+# To run Docker without sudo
 sudo usermod -aG docker $USER
-# اس کے بعد لاگ آؤٹ کر کے دوبارہ لاگ ان کریں
+# Log out and log back in for changes to take effect
 ```
 
-### **مرحلہ 2: انسٹالیشن (کالی لینکس کے لیے مخصوص طریقہ)**
+### **Step 2: Installation (Specific for Kali Linux)**
 ```bash
 git clone https://github.com/Hafiz380/enhanced-strix.git
 cd enhanced-strix
 
-# ورچوئل انوائرمنٹ بنانا اور ایکٹیویٹ کرنا
+# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# اب ڈیپینڈنسیز انسٹال کریں
+# Install dependencies
 pip install -e .
 ```
 
-### **مرحلہ 3: ٹول چلانا**
+### **Step 3: Run the Tool**
 ```bash
-# API Keys سیٹ کریں
+# Set API Keys
 export STRIX_LLM="openai/gpt-4o"
 export LLM_API_KEY="your-api-key"
 
-# اسکین شروع کریں
+# Start the scan
 strix --target https://example.com
 
-# اگر 'strix' کمانڈ نہ ملے تو یہ استعمال کریں (Trae Terminal طریقہ):
+# If 'strix' command is not found, use:
 python3 -m strix.interface.main --target https://example.com
 ```
 
 ---
 
-## **4. لوکل AI (Local AI) اور پراکسی سیٹ اپ**
+## **4. Local AI and Proxy Setup**
 
-اگر آپ اپنا لوکل ماڈل یا پراکسی سرور (جیسے `iflow.cn` یا `Ollama`) استعمال کرنا چاہتے ہیں:
+If you want to use a local model or a proxy server (like `iflow.cn` or `Ollama`):
 
 ```powershell
-# ونڈوز کے لیے
+# For Windows
 $env:STRIX_LLM="openai/your-model-name"
 $env:LLM_API_KEY="your-key"
 $env:LLM_API_BASE="http://localhost:20128/v1"
 
-# لینکس کے لیے
+# For Linux
 export STRIX_LLM="openai/your-model-name"
 export LLM_API_KEY="your-key"
 export LLM_API_BASE="http://localhost:20128/v1"
@@ -114,24 +114,24 @@ export LLM_API_BASE="http://localhost:20128/v1"
 
 ---
 
-## **5. وریفیکیشن (Verification)**
+## **5. Verification**
 
-انسٹالیشن کے بعد یہ چیکس کریں:
-1. **Version Check**: `strix --version` چلائیں، یہ ورژن دکھائے گا۔
-2. **Docker Check**: `docker ps` چلائیں، یہ خالی لسٹ دکھائے گا (یعنی ڈوکر چل رہا ہے)۔
-3. **ECC Skills Check**: ٹول کے اندر `load_skill` استعمال کریں، اگر وہ `ecc/` فولڈر سے اسکلز لوڈ کر رہا ہے تو انٹیگریشن درست ہے۔
+Perform these checks after installation:
+1. **Version Check**: Run `strix --version` to see the version number.
+2. **Docker Check**: Run `docker ps` to see an empty list (indicating Docker is running).
+3. **ECC Skills Check**: Use `load_skill` within the tool; if it loads skills from the `ecc/` folder, the integration is correct.
 
 ---
 
-## **6. عام مسائل اور ان کے حل (Troubleshooting)**
+## **6. Common Issues & Solutions (Troubleshooting)**
 
-| مسئلہ | وجہ | حل |
+| Issue | Cause | Solution |
 | :--- | :--- | :--- |
-| **externally-managed-environment** | کالی لینکس پر براہ راست انسٹالیشن | ہمیشہ `venv` ایکٹیویٹ کر کے `pip` استعمال کریں۔ |
-| **neither 'setup.py' nor 'pyproject.toml' found** | غلط فولڈر میں ہونا | یقینی بنائیں کہ آپ `enhanced-strix` فولڈر کے اندر ہیں (جہاں `pyproject.toml` ہے)۔ |
-| **DOCKER NOT INSTALLED** | ڈوکر نہیں چل رہا | ڈوکر ڈیسک ٹاپ چلائیں یا `sudo systemctl start docker` کریں۔ |
-| **ModuleNotFoundError** | لائبریریز انسٹال نہیں ہوئیں | دوبارہ `pip install -e .` چلائیں (venv کے اندر)۔ |
+| **externally-managed-environment** | Direct installation on Kali Linux | Always activate `venv` before using `pip`. |
+| **neither 'setup.py' nor 'pyproject.toml' found** | Being in the wrong folder | Ensure you are inside the `enhanced-strix` folder (where `pyproject.toml` is). |
+| **DOCKER NOT INSTALLED** | Docker is not running | Run Docker Desktop or `sudo systemctl start docker`. |
+| **ModuleNotFoundError** | Libraries not installed | Run `pip install -e .` again (inside venv). |
 
 ---
 
-**نوٹ**: یہ ٹول پہلی بار چلنے پر ڈوکر امیج ڈاؤن لوڈ کرتا ہے جس میں 5-10 منٹ لگ سکتے ہیں۔ صبر سے کام لیں!
+**Note**: This tool pulls a Docker image on the first run, which may take 5-10 minutes. Please be patient!

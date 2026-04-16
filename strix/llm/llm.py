@@ -1,4 +1,5 @@
 import asyncio
+import time
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
@@ -9,7 +10,10 @@ from litellm import acompletion, completion_cost, stream_chunk_builder, supports
 from litellm.utils import supports_prompt_caching, supports_vision
 
 from strix.config import Config
+from strix.config.settings_manager import SettingsManager
+from strix.llm.cache import LLMCache
 from strix.llm.config import LLMConfig
+from strix.telemetry.token_report import TokenReporter
 from strix.llm.memory_compressor import MemoryCompressor
 from strix.llm.utils import (
     _truncate_to_first_function,
@@ -68,6 +72,9 @@ class LLM:
             getattr(config, "system_prompt_context", {}) or {}
         )
         self._total_stats = RequestStats()
+        self.cache = LLMCache()
+        self.settings_manager = SettingsManager()
+        self.token_reporter = TokenReporter()
         self.memory_compressor = MemoryCompressor(model_name=config.litellm_model)
         self.system_prompt = self._load_system_prompt(agent_name)
 
@@ -159,26 +166,59 @@ class LLM:
         self, conversation_history: list[dict[str, Any]]
     ) -> AsyncIterator[LLMResponse]:
         messages = self._prepare_messages(conversation_history)
+        
+        # Check cache first
+        cached_response = self.cache.get(messages, self.config.litellm_model)
+        if cached_response:
+            self._total_stats.requests += 1
+            self._total_stats.cached_tokens += cached_response.get("usage", {}).get("prompt_tokens", 0)
+            yield LLMResponse(
+                content=cached_response["content"],
+                tool_invocations=cached_response.get("tool_invocations"),
+                thinking_blocks=cached_response.get("thinking_blocks"),
+            )
+            return
+
         max_retries = int(Config.get("strix_llm_max_retries") or "5")
 
         for attempt in range(max_retries + 1):
+            # Select best API config if failover is needed or if none is provided
+            api_cfg = self.settings_manager.get_best_config()
+            start_time = time.time()
+            
             try:
-                async for response in self._stream(messages):
+                accumulated_content = ""
+                async for response in self._stream(messages, api_cfg):
+                    accumulated_content = response.content
                     yield response
-                return  # noqa: TRY300
-            except Exception as e:  # noqa: BLE001
+                
+                # Update performance stats on success
+                if api_cfg:
+                    latency = time.time() - start_time
+                    self.settings_manager.update_performance(api_cfg.name, latency, success=True)
+                
+                # Cache the successful result
+                # (We'll need to store the final response with usage info)
+                # This is done inside _stream's last yield or after _stream ends
+                return 
+            except Exception as e:
+                # Update performance stats on failure
+                if api_cfg:
+                    self.settings_manager.update_performance(api_cfg.name, 0, success=False)
+                
                 if attempt >= max_retries or not self._should_retry(e):
                     self._raise_error(e)
                 wait = min(90, 2 * (2**attempt))
                 await asyncio.sleep(wait)
 
-    async def _stream(self, messages: list[dict[str, Any]]) -> AsyncIterator[LLMResponse]:
+    async def _stream(self, messages: list[dict[str, Any]], api_cfg: Optional[Any] = None) -> AsyncIterator[LLMResponse]:
         accumulated = ""
         chunks: list[Any] = []
         done_streaming = 0
 
         self._total_stats.requests += 1
-        response = await acompletion(**self._build_completion_args(messages), stream=True)
+        completion_args = self._build_completion_args(messages, api_cfg)
+        response = await acompletion(**completion_args, stream=True)
 
         async for chunk in response:
             chunks.append(chunk)
@@ -200,7 +240,20 @@ class LLM:
                 yield LLMResponse(content=accumulated)
 
         if chunks:
-            self._update_usage_stats(stream_chunk_builder(chunks))
+            response_obj = stream_chunk_builder(chunks)
+            self._update_usage_stats(response_obj)
+            
+            # Cache the final result
+            self.cache.set(
+                messages, 
+                self.config.litellm_model, 
+                {
+                    "content": accumulated,
+                    "tool_invocations": parse_tool_invocations(accumulated),
+                    "thinking_blocks": self._extract_thinking(chunks),
+                    "usage": getattr(response_obj, "usage", {}).to_dict() if hasattr(response_obj, "usage") and response_obj.usage else {}
+                }
+            )
 
         accumulated = normalize_tool_format(accumulated)
         accumulated = fix_incomplete_tool_call(_truncate_to_first_function(accumulated))
@@ -240,21 +293,30 @@ class LLM:
 
         return messages
 
-    def _build_completion_args(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
+    def _build_completion_args(self, messages: list[dict[str, Any]], api_cfg: Optional[Any] = None) -> dict[str, Any]:
         if not self._supports_vision():
             messages = self._strip_images(messages)
 
+        model = self.config.litellm_model
+        api_key = self.config.api_key
+        api_base = self.config.api_base
+
+        if api_cfg:
+            model = api_cfg.model
+            api_key = api_cfg.api_key
+            api_base = api_cfg.api_base
+
         args: dict[str, Any] = {
-            "model": self.config.litellm_model,
+            "model": model,
             "messages": messages,
             "timeout": self.config.timeout,
             "stream_options": {"include_usage": True},
         }
 
-        if self.config.api_key:
-            args["api_key"] = self.config.api_key
-        if self.config.api_base:
-            args["api_base"] = self.config.api_base
+        if api_key:
+            args["api_key"] = api_key
+        if api_base:
+            args["api_base"] = api_base
         if self._supports_reasoning():
             args["reasoning_effort"] = self._reasoning_effort
 
