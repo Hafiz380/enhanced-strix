@@ -1,0 +1,139 @@
+
+/* Advanced GUI Styles for Enhanced Strix */
+
+Screen {
+    background: #0a0a0a;
+    color: #e5e5e5;
+}
+
+#header {
+    height: 3;
+    background: #1a1a1a;
+    color: #22c55e;
+    content-align: center middle;
+    text-style: bold;
+    border-bottom: double #333333;
+}
+
+#main_layout {
+    layout: horizontal;
+    height: 1fr;
+}
+
+#sidebar {
+    width: 25%;
+    background: #121212;
+    border-right: solid #333333;
+    padding: 1;
+}
+
+#center_panel {
+    width: 50%;
+    background: #000000;
+    border-right: solid #333333;
+}
+
+#right_panel {
+    width: 25%;
+    background: #121212;
+    padding: 1;
+}
+
+#console_output {
+    height: 1fr;
+    background: #000000;
+    padding: 1;
+    overflow-y: scroll;
+    scrollbar-size: 1 1;
+}
+
+#thinking_panel {
+    height: 1fr;
+    background: #121212;
+    border: round #333333;
+    padding: 1;
+    margin-bottom: 1;
+}
+
+#action_panel {
+    height: 10;
+    background: #1a1a1a;
+    border: round #333333;
+    padding: 1;
+}
+
+.panel_title {
+    text-align: center;
+    text-style: bold;
+    color: #22c55e;
+    margin-bottom: 1;
+    border-bottom: solid #333333;
+}
+
+#command_area {
+    height: 5;
+    background: #1a1a1a;
+    border-top: double #333333;
+    padding: 1;
+    layout: horizontal;
+}
+
+#prompt {
+    width: 3;
+    color: #22c55e;
+    text-style: bold;
+    content-align: center middle;
+}
+
+#command_input {
+    width: 1fr;
+    background: #000000;
+    border: solid #333333;
+    color: #ffffff;
+    padding: 0 1;
+}
+
+#command_input:focus {
+    border: solid #22c55e;
+}
+
+#footer {
+    height: 1;
+    background: #1a1a1a;
+    color: #737373;
+    padding: 0 1;
+    layout: horizontal;
+}
+
+.stat_item {
+    margin-right: 2;
+}
+
+.vuln_high { color: #ea580c; }
+.vuln_crit { color: #dc2626; }
+.vuln_med { color: #d97706; }
+.vuln_low { color: #22c55e; }
+
+#thinking_content {
+    color: #a3a3a3;
+    italic: true;
+}
+
+#action_content {
+    color: #60a5fa;
+}
+
+/* Tree and List styling */
+Tree {
+    background: transparent;
+    padding: 0;
+}
+
+.vuln_item {
+    padding: 0 1;
+    border-bottom: solid #1a1a1a;
+}
+
+.vuln_item:hover {
+    background: #1a1a1a;
+}

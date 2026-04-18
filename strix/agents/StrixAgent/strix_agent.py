@@ -1,7 +1,9 @@
+from dataclasses import asdict
 from typing import Any
 
 from strix.agents.base_agent import BaseAgent
 from strix.llm.config import LLMConfig
+from strix.verification.engine import VerificationEngine
 
 
 class StrixAgent(BaseAgent):
@@ -15,6 +17,7 @@ class StrixAgent(BaseAgent):
             default_skills = ["root_agent"]
 
         self.default_llm_config = LLMConfig(skills=default_skills)
+        self.verification_engine = VerificationEngine()
 
         super().__init__(config)
 
@@ -61,6 +64,29 @@ class StrixAgent(BaseAgent):
         targets = scan_config.get("targets", [])
         diff_scope = scan_config.get("diff_scope", {}) or {}
         self.llm.set_system_prompt_context(self._build_system_scope_context(scan_config))
+
+        from strix.telemetry.tracer import get_global_tracer
+        tracer = get_global_tracer()
+
+        # --- HOOK: Real-time Vulnerability Verification ---
+        if tracer and tracer.vulnerability_found_callback:
+            original_callback = tracer.vulnerability_found_callback
+
+            async def verified_callback(vuln: dict[str, Any]) -> None:
+                # 1. Run Verification
+                verification = await self.verification_engine.verify_vulnerability(vuln)
+                # 2. Enrich vulnerability report
+                vuln["verification"] = asdict(verification)
+                # 3. Call original display callback
+                if asyncio.iscoroutinefunction(original_callback):
+                    await original_callback(vuln)
+                else:
+                    original_callback(vuln)
+
+            def sync_verified_callback(vuln: dict[str, Any]) -> None:
+                asyncio.create_task(verified_callback(vuln))
+
+            tracer.vulnerability_found_callback = sync_verified_callback
 
         repositories = []
         local_code = []
@@ -149,6 +175,17 @@ class StrixAgent(BaseAgent):
             task_description += f"\n\nSpecial instructions: {user_instructions}"
 
         result = await self.agent_loop(task=task_description)
+        
+        # --- NEW: Automated Vulnerability Verification ---
+        verified_results = []
+        if isinstance(result, dict) and "vulnerabilities" in result:
+            for vuln in result["vulnerabilities"]:
+                verification = await self.verification_engine.verify_vulnerability(vuln)
+                verified_results.append(asdict(verification))
+        
+        # Append verification stats to result
+        result["verification_summary"] = self.verification_engine.get_stats()
+        result["verified_findings"] = verified_results
         
         # Report token usage stats
         from strix.telemetry.token_report import TokenReporter

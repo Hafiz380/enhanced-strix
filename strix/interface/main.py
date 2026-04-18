@@ -26,6 +26,8 @@ apply_saved_config()
 
 from strix.interface.cli import run_cli  # noqa: E402
 from strix.interface.tui import run_tui  # noqa: E402
+from strix.interface.gui import run_gui  # noqa: E402
+from strix.interface.web.server import start_web_gui  # noqa: E402
 from strix.interface.utils import (  # noqa: E402
     assign_workspace_subdirs,
     build_final_stats_text,
@@ -232,13 +234,19 @@ async def warm_up_llm() -> None:
 
         validate_llm_response(response)
 
-    except Exception as e:  # noqa: BLE001
+    except (Exception, AssertionError) as e:  # noqa: BLE001
         error_text = Text()
         error_text.append("LLM CONNECTION FAILED", style="bold red")
         error_text.append("\n\n", style="white")
         error_text.append("Could not establish connection to the language model.\n", style="white")
         error_text.append("Please check your configuration and try again.\n", style="white")
-        error_text.append(f"\nError: {e}", style="dim white")
+        
+        # Clean up LiteLLM specific internal errors for better readability
+        error_msg = str(e)
+        if "AssertionError" in error_msg:
+            error_msg = "Invalid response format from LLM provider (Check your API Key/Base URL)"
+        
+        error_text.append(f"\nError: {error_msg}", style="dim white")
 
         panel = Panel(
             error_text,
@@ -277,12 +285,13 @@ def parse_arguments() -> argparse.Namespace:
     # Scan command (default)
     scan_parser = subparsers.add_parser("scan", help="Run a security scan")
     scan_parser.add_argument(
-        "-t", "--target", type=str, required=True, action="append",
+        "-t", "--target", type=str, required=False, action="append",
         help="Target to test (URL, repo, dir, domain, IP)"
     )
     scan_parser.add_argument("--instruction", type=str)
     scan_parser.add_argument("--instruction-file", type=str)
     scan_parser.add_argument("-n", "--non-interactive", action="store_true")
+    scan_parser.add_argument("-g", "--gui", action="store_true", help="Launch the advanced GUI interface")
     scan_parser.add_argument("-m", "--scan-mode", choices=["quick", "standard", "deep"], default="deep")
     scan_parser.add_argument("--scope-mode", choices=["auto", "diff", "full"], default="auto")
     scan_parser.add_argument("--diff-base", type=str)
@@ -302,16 +311,24 @@ def parse_arguments() -> argparse.Namespace:
     # Stats command
     subparsers.add_parser("stats", help="Show token usage statistics")
 
+    # Web command
+    web_parser = subparsers.add_parser("web", help="Launch the web-based GUI")
+    web_parser.add_argument("--host", default="127.0.0.1", help="Host to bind the server to")
+    web_parser.add_argument("--port", type=int, default=8000, help="Port to bind the server to")
+
     # Version
     parser.add_argument("-v", "--version", action="version", version=f"strix {get_version()}")
 
     # Handle legacy mode (no subcommand)
-    if len(sys.argv) > 1 and sys.argv[1] not in ["scan", "config", "stats", "-v", "--version", "-h", "--help"]:
+    if len(sys.argv) > 1 and sys.argv[1] not in ["scan", "config", "stats", "web", "-v", "--version", "-h", "--help"]:
         sys.argv.insert(1, "scan")
 
     args = parser.parse_args()
 
     if args.command == "scan":
+        if not args.target:
+            parser.error("The following arguments are required: -t/--target")
+
         if args.instruction and args.instruction_file:
             parser.error("Cannot specify both --instruction and --instruction-file.")
 
@@ -454,8 +471,32 @@ def persist_config() -> None:
 
 
 def main() -> None:  # noqa: PLR0912, PLR0915
+    # Standard setup for cross-platform asyncio
     if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        import warnings
+        # Suppress deprecation warnings for internal asyncio policies if they are handled by Python
+        warnings.filterwarnings("ignore", category=DeprecationWarning, module="asyncio")
+        
+        # Ensure UTF-8 output on Windows terminal
+        import io
+        try:
+            # This helps with UnicodeEncodeError
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', line_buffering=True)
+        except Exception:
+            pass
+            
+        # FORCE ASCII for Windows to avoid mojibake/broken boxes
+        try:
+            from rich.console import Console
+            from rich.box import ASCII
+            # Override the default box style globally for Windows
+            import rich.panel
+            import rich.table
+            rich.panel.Panel.box = ASCII
+            rich.table.Table.box = ASCII
+        except Exception:
+            pass
 
     args = parse_arguments()
 
@@ -471,6 +512,10 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     if args.command == "stats":
         reporter = TokenReporter()
         print(reporter.generate_report())
+        return
+
+    if args.command == "web":
+        start_web_gui(host=args.host, port=args.port)
         return
 
     # Scan command (or default)
@@ -535,6 +580,10 @@ def main() -> None:  # noqa: PLR0912, PLR0915
 
     is_whitebox = bool(args.local_sources)
 
+    if args.command == "web":
+        start_web_gui(host=args.host, port=args.port)
+        return
+
     posthog.start(
         model=Config.get("strix_llm"),
         scan_mode=args.scan_mode,
@@ -547,6 +596,8 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     try:
         if args.non_interactive:
             asyncio.run(run_cli(args))
+        elif hasattr(args, 'gui') and args.gui:
+            run_gui(args)
         else:
             asyncio.run(run_tui(args))
     except KeyboardInterrupt:

@@ -188,6 +188,15 @@ async def run_cli(args: Any) -> None:  # noqa: PLR0915
 
         final_report_text = Text()
         final_report_text.append("Penetration test summary", style="bold #60a5fa")
+        
+        # --- NEW: Verification Summary Stats ---
+        if hasattr(agent, 'verification_engine'):
+            stats = agent.verification_engine.get_stats()
+            final_report_text.append("\n\n")
+            final_report_text.append("Verification Statistics", style="bold #4ade80")
+            final_report_text.append(f"\n- Total Discovered: {stats['total_vulns']}")
+            final_report_text.append(f"\n- Successfully Verified: {stats['verified_vulns']}")
+            final_report_text.append(f"\n- Verification Rate: {stats['verification_rate']}")
 
         final_report_panel = Panel(
             Text.assemble(

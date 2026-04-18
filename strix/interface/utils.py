@@ -201,6 +201,43 @@ def format_vulnerability_report(report: dict[str, Any]) -> Text:  # noqa: PLR091
         text.append("\n")
         text.append(remediation_steps)
 
+    # --- NEW: Verification Details ---
+    verification = report.get("verification")
+    if verification:
+        text.append("\n\n")
+        text.append("--- VERIFICATION STATUS ---", style="bold #3b82f6")
+        
+        status = "VERIFIED" if verification.get("is_verified") else "UNVERIFIED"
+        status_color = "#22c55e" if verification.get("is_verified") else "#ef4444"
+        text.append(f"\nStatus: ", style=field_style)
+        text.append(status, style=f"bold {status_color}")
+        
+        text.append(f"\nConfidence: ", style=field_style)
+        text.append(f"{verification.get('confidence_score', 0)*100:.1f}%")
+        
+        text.append(f"\nRisk Level: ", style=field_style)
+        text.append(verification.get("risk_level", "Unknown"))
+        
+        if verification.get("impact_demonstration"):
+            text.append("\n\nImpact Demonstration", style=field_style)
+            text.append("\n")
+            text.append(verification["impact_demonstration"])
+            
+        if verification.get("reproduction_steps"):
+            text.append("\n\nReproduction Steps", style=field_style)
+            for step in verification["reproduction_steps"]:
+                text.append(f"\n- {step}")
+                
+        if verification.get("reproduction_script"):
+            text.append("\n\nPractical POC Script", style=field_style)
+            text.append("\n")
+            text.append(verification["reproduction_script"], style="dim")
+            
+        if verification.get("extracted_data_preview"):
+            text.append("\n\nSensitive Data Classification", style="bold #ea580c")
+            text.append("\n")
+            text.append(verification["extracted_data_preview"], style="italic")
+
     return text
 
 

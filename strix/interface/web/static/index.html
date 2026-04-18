@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strix Advanced Web GUI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="logo">STRIX <span>ADVANCED</span></div>
+            <div id="status-indicator">Connected</div>
+        </header>
+        
+        <main>
+            <section id="sidebar">
+                <div class="panel">
+                    <h3>AGENTS & TOOLS</h3>
+                    <div id="agent-activity">
+                        <div class="activity-item">Waiting for AI activity...</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>SCAN HISTORY</h3>
+                    <div id="scan-history">
+                        <div class="history-empty">No history available</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="center-panel">
+                <div class="panel console-container">
+                    <h3>AI ACTION CONSOLE</h3>
+                    <div id="console-output"></div>
+                </div>
+                <div id="command-area">
+                    <span class="prompt">></span>
+                    <input type="text" id="command-input" placeholder="Ask AI to perform a security task..." autocomplete="off">
+                </div>
+            </section>
+            
+            <section id="right-panel">
+                <div class="panel">
+                    <h3>VULNERABILITIES (Click to View)</h3>
+                    <div id="vuln-list"></div>
+                </div>
+                <div class="panel">
+                    <h3>AI DECISION LOGIC</h3>
+                    <div id="thinking-content">Awaiting command...</div>
+                </div>
+                <div class="panel">
+                    <h3>CURRENT STATUS</h3>
+                    <div id="action-content">Idle</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Vulnerability Detail Modal -->
+        <div id="vuln-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2 id="modal-title">Vulnerability Details</h2>
+                <div id="modal-body">
+                    <div class="detail-row"><strong>Severity:</strong> <span id="modal-severity"></span></div>
+                    <div class="detail-row"><strong>Target:</strong> <span id="modal-target"></span></div>
+                    <div class="detail-row"><strong>Description:</strong> <p id="modal-description"></p></div>
+                    <div class="detail-row"><strong>Remediation:</strong> <p id="modal-remediation"></p></div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div id="stats">
+                Requests: 0 | Tokens: 0 | Cost: $0.00
+            </div>
+        </footer>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>

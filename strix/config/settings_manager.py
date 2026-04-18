@@ -2,13 +2,17 @@ import base64
 import json
 import os
 import time
+import re
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any, Optional, Dict, List
+import logging
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -40,6 +44,9 @@ class SettingsManager:
         self.key_file = self.config_dir / ".key"
         self._fernet = self._init_encryption()
         self.configs: List[APIConfig] = self._load_configs()
+        
+        # Load external config (YAML/JSON) if present
+        self.load_external_config()
 
     def _init_encryption(self) -> Fernet:
         """Initialize encryption key based on machine-specific or persistent key."""
@@ -90,7 +97,10 @@ class SettingsManager:
                 
             with self.config_file.open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
-            self.config_file.chmod(0o600)  # Restrict access
+            try:
+                self.config_file.chmod(0o600)  # Restrict access
+            except Exception:
+                pass # May fail on Windows
             return True
         except (OSError, Exception):
             return False
@@ -108,6 +118,54 @@ class SettingsManager:
         
         self.configs.append(APIConfig(name=name, model=model, api_key=api_key, api_base=api_base, priority=priority))
         return self.save_configs()
+
+    def load_external_config(self) -> None:
+        """Load and merge configuration from external YAML/JSON file if present."""
+        try:
+            import yaml
+        except ImportError:
+            return # YAML support requires PyYAML
+
+        # Possible locations for external config
+        root_dir = Path(__file__).parent.parent.parent # Project root
+        possible_paths = [
+            root_dir / ".config" / "api-config.yaml",
+            root_dir / "api-config.yaml",
+            root_dir / "endpoints.json"
+        ]
+        
+        for path in possible_paths:
+            if path.exists():
+                try:
+                    with path.open("r", encoding="utf-8") as f:
+                        if path.suffix in [".yaml", ".yml"]:
+                            data = yaml.safe_load(f)
+                        else:
+                            data = json.load(f)
+                            
+                        if not data or "endpoints" not in data:
+                            continue
+                            
+                        for ep in data["endpoints"]:
+                            name = ep.get("name")
+                            model = ep.get("model")
+                            api_key = ep.get("api_key", "")
+                            
+                            # Expand environment variables if key is in ${VAR} format
+                            if api_key and isinstance(api_key, str) and api_key.startswith("${") and api_key.endswith("}"):
+                                env_var = api_key[2:-1]
+                                api_key = os.getenv(env_var, api_key)
+                            
+                            if name and model:
+                                self.add_config(
+                                    name=name,
+                                    model=model,
+                                    api_key=api_key,
+                                    api_base=ep.get("api_base"),
+                                    priority=ep.get("priority", 100)
+                                )
+                except Exception as e:
+                    logger.error(f"Failed to load external config from {path}: {e}")
 
     def get_best_config(self) -> Optional[APIConfig]:
         """Get the best API configuration based on latency, priority, and failure history."""

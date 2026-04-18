@@ -58,19 +58,35 @@ class TokenReporter:
             pass
 
     def generate_report(self) -> str:
+        from strix.config.settings_manager import SettingsManager
+        sm = SettingsManager()
+        
         stats = self.load_stats()
         report = [
             "========================================",
-            "        STRIX TOKEN USAGE REPORT        ",
+            "        STRIX PERFORMANCE REPORT        ",
             "========================================",
             f"Total Requests:      {stats.get('total_requests', 0)}",
             f"Total Input Tokens:  {stats.get('total_input_tokens', 0):,}",
             f"Total Output Tokens: {stats.get('total_output_tokens', 0):,}",
             f"Total Cached Tokens: {stats.get('total_cached_tokens', 0):,}",
             f"Total Estimated Cost: ${stats.get('total_cost', 0.0):.4f}",
+            "----------------------------------------",
+            "Active API Endpoints:",
+        ]
+        
+        if sm.configs:
+            for cfg in sorted(sm.configs, key=lambda x: x.priority):
+                status = "🟢 Ready" if cfg.failures < 3 else "🔴 Disabled"
+                latency = f"{cfg.latency:.2f}s" if cfg.latency != float('inf') else "N/A"
+                report.append(f"- {cfg.name:<16} | {cfg.model:<24} | {status} | Latency: {latency}")
+        else:
+            report.append("  (No endpoints configured)")
+            
+        report.extend([
             "========================================",
             "Recent Sessions:",
-        ]
+        ])
         
         for s in stats.get("sessions", [])[-5:]:
             report.append(f"- Session {s['session_id'][:8]}: {s.get('input_tokens', 0)} in / {s.get('output_tokens', 0)} out / ${s.get('cost', 0.0):.4f}")

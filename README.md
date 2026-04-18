@@ -30,59 +30,62 @@ It doesn't just find bugs; it understands application logic, executes dynamic pa
 
 ## 🚀 **Quick Start**
 
-For detailed setup on Windows, Linux, or Kali, see the **[Installation Guide](INSTALLATION_GUIDE.md)**.
+For detailed setup, see our platform-specific guides:
+- **[Windows (One-Click Installer)](setup.ps1)**
+- **[Kali Linux & Linux Guide](KALI_INSTALLATION.md)**
+- **[Full Installation Guide](INSTALLATION_GUIDE.md)**
 
-### **Prerequisites**
-- **Docker Desktop** (Required for the security sandbox)
-- **Python 3.12+**
-- **LLM API Key** (OpenAI, Anthropic, or compatible proxy)
+### **One-Click Installation (Windows)**
+Simply download the repository and double-click **`install.bat`**. The installer will handle Python checks, virtual environment setup, and dependencies automatically in under 5 minutes.
 
-### **Installation**
+### **Manual Installation**
 ```bash
 # Clone the repository
 git clone https://github.com/Hafiz380/enhanced-strix.git
 cd enhanced-strix
 
-# Set up virtual environment
-python -m venv venv
-# Windows: .\venv\Scripts\activate | Linux: source venv/bin/activate
+# Automated Setup (Linux/Kali)
+chmod +x setup.sh && ./setup.sh
 
-# Install with dependencies
+# Manual Setup
+python -m venv venv
+source venv/bin/activate # Windows: .\venv\Scripts\activate
 pip install -e .
 ```
 
 ### **Run Your First Assessment**
 ```bash
-# Configure your first provider
+# Configure your first provider (or use .config/api-config.yaml)
 strix config add --name default --model gpt-4o --key sk-xxxx
 
-# Start scanning a target
+# Start scanning a target (Terminal)
 strix --target https://example.com
+
+# Start scanning (Web UI)
+strix web
 ```
 
 ---
 
-## 🔧 **Optimization & Advanced Modes**
-To maximize efficiency and minimize costs:
-```bash
-strix -t https://your-target.com -m quick -n
-```
-- `-m quick`: Targets high-impact vulnerabilities first, saving time and tokens.
-- `-n`: Headless mode for CI/CD integration and reduced local resource usage.
-
-### **Token Usage Reporting**
-Monitor your efficiency with real-time stats:
-```bash
-strix stats
-```
-
----
+## 🛠️ **Advanced Features**
+- **🔄 Multi-API Failover**: Configure multiple LLM providers in `.config/api-config.yaml`. Strix automatically switches to backups if one fails.
+- **🌐 Web Interface**: Modern, user-friendly GUI for managing scans and viewing results (`strix web`).
+- **🐧 Kali Linux Native**: Fully ported and tested for Kali Linux with a dedicated installer.
+- **🛡️ Secure Storage**: API keys are encrypted locally using AES-256.
 
 ## 📂 **Project Architecture**
 - `strix/`: The heartbeat of the agent logic and orchestrator.
 - `strix/skills/ecc/`: A massive library of 150+ security-focused skills.
 - `strix/config/`: Secure settings and failover management.
-- `docs/`: Comprehensive technical documentation.
+- `.config/`: Human-readable YAML configuration for API endpoints.
+- `docs/`: Comprehensive technical documentation and Urdu user guides.
+
+## 🧪 **Testing & Verification**
+Verify your installation with our built-in test suite:
+```bash
+pytest tests
+```
+*Current Status: 111+ test cases passing across Windows & Linux.*
 
 ## 🤝 **Contributing**
 Join the mission to build the most advanced AI security tool. Check out our [Contributing Guide](CONTRIBUTING.md) to get started.

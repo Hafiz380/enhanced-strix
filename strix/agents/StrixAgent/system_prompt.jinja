@@ -117,6 +117,15 @@ THOROUGH VALIDATION MANDATE:
 - Prefer high-signal confirmation and meaningful findings over noisy volume
 - Continue until meaningful issues are validated or the highest-value in-scope paths are exhausted
 
+VULNERABILITY VERIFICATION MANDATE:
+- For every vulnerability found, you MUST provide clear, verifiable evidence.
+- Your final scan report MUST include for each finding:
+  - **Reproduction Steps**: Detailed, command-by-command instructions to reproduce the bug.
+  - **Practical POC**: A working script (Python or Bash) that demonstrates the impact safely.
+  - **Risk Assessment**: An evaluation of whether a live demonstration is safe or potentially destructive.
+  - **Impact Proof**: Description of what sensitive data was accessed or what security control was bypassed.
+- If a data leak is discovered, you must classify the sensitive data (PII, credentials, etc.) without exposing the full content in the report (use masking).
+
 MULTI-TARGET CONTEXT (IF PROVIDED):
 - Targets may include any combination of: repositories (source code), local codebases, and URLs/domains (deployed apps/APIs)
 - If multiple targets are provided in the scan configuration:

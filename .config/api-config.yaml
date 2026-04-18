@@ -1,0 +1,52 @@
+# 🦅 Strix AI Pentesting Framework - API Configuration
+# --------------------------------------------------
+# This file manages your LLM providers and failover strategy.
+# You can define multiple endpoints; Strix will automatically 
+# switch to the next one if a provider fails or hits rate limits.
+
+# Global Settings
+settings:
+  # Reasoning effort for models that support it (e.g., o1, o3)
+  # Options: none, minimal, low, medium, high, xhigh
+  reasoning_effort: "high"
+  
+  # Global timeout for API requests (in seconds)
+  timeout: 300
+  
+  # Maximum number of retries per request before failing over
+  max_retries: 3
+
+# API Endpoints (Failover Support)
+# -------------------------------
+# Providers are prioritized based on their order in this list.
+# Strix tracks latency and success rates to optimize routing.
+endpoints:
+  - name: "primary-openai"
+    model: "openai/gpt-4o"
+    # Security: It is RECOMMENDED to use environment variables for keys.
+    # Syntax: ${ENV_VAR_NAME}
+    api_key: "${OPENAI_API_KEY}"
+    api_base: "https://api.openai.com/v1"
+    priority: 1  # Higher priority (1) is tried first
+
+  - name: "backup-anthropic"
+    model: "anthropic/claude-3-5-sonnet-20240620"
+    api_key: "${ANTHROPIC_API_KEY}"
+    priority: 2
+
+  - name: "fallback-openrouter"
+    model: "openrouter/anthropic/claude-3.5-sonnet"
+    api_key: "${OPENROUTER_API_KEY}"
+    api_base: "https://openrouter.ai/api/v1"
+    priority: 3
+
+  - name: "local-llm"
+    model: "ollama/llama3"
+    api_key: "not-needed"
+    api_base: "http://localhost:11434"
+    priority: 4
+
+# 🛡️ Security Best Practices:
+# 1. Never commit your actual API keys to version control.
+# 2. Use environment variables (e.g., ${MY_KEY}) to keep secrets out of this file.
+# 3. For production, Strix uses encrypted storage (~/.strix/.key) automatically.
